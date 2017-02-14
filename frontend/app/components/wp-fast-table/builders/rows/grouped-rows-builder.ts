@@ -1,12 +1,13 @@
-import {WorkPackageTableMetadata} from "../../wp-table-metadata";
-import {RowsBuilder} from "./rows-builder";
-import {States} from "../../../states.service";
-import {injectorBridge} from "../../../angular/angular-injector-bridge.functions";
-import {groupedRowClassName} from "../../helpers/wp-table-row-helpers";
-import {WorkPackageTableColumnsService} from "../../state/wp-table-columns.service";
-import {WorkPackageTable} from "../../wp-fast-table";
-import {WorkPackageResource} from "../../../api/api-v3/hal-resources/work-package-resource.service";
-import {GroupObject, WorkPackageTableRow} from "../../wp-table.interfaces";
+import {WorkPackageTableMetadata} from '../../wp-table-metadata';
+import {RowsBuilder} from './rows-builder';
+import {States} from '../../../states.service';
+import {injectorBridge} from '../../../angular/angular-injector-bridge.functions';
+import {groupedRowClassName} from '../../helpers/wp-table-row-helpers';
+import {WorkPackageTableColumnsService} from '../../state/wp-table-columns.service';
+import {WorkPackageTable} from '../../wp-fast-table';
+import {WorkPackageResource} from '../../../api/api-v3/hal-resources/work-package-resource.service';
+import {WorkPackageTableRow} from '../../wp-table.interfaces';
+import {GroupObject} from '../../../api/api-v3/hal-resources/wp-collection-resource.service';
 
 export const rowGroupClassName = 'wp-table--group-header';
 export const collapsedRowClass = '-collapsed';
@@ -41,9 +42,8 @@ export class GroupedRowsBuilder extends RowsBuilder {
    * @param table
    */
   public internalBuildRows(table:WorkPackageTable) {
-    const metaData = table.metaData as WorkPackageTableMetadata;
-    const groupBy = metaData.groupBy as string;
-    const groups = this.getGroupData(groupBy, metaData.groups);
+    const groupBy = table.query.groupBy as GroupObject;
+    const groups = this.getGroupData(groupBy.name, table.query.results.groups);
 
     // Remember the colspan for the group rows from the current column count
     // and add one for the details link.
@@ -53,7 +53,7 @@ export class GroupedRowsBuilder extends RowsBuilder {
     let currentGroup:GroupObject|null = null;
     table.rows.forEach((wpId:string) => {
       let row = table.rowIndex[wpId];
-      let nextGroup = this.matchingGroup(row.object, groups, groupBy);
+      let nextGroup = this.matchingGroup(row.object, groups, groupBy.name);
 
       if (currentGroup !== nextGroup) {
         tbodyContent.appendChild(this.buildGroupRow(nextGroup, colspan));
@@ -103,8 +103,8 @@ export class GroupedRowsBuilder extends RowsBuilder {
    * Refresh the group expansion state
    */
   public refreshExpansionState(table:WorkPackageTable) {
-    const metaData = table.metaData as WorkPackageTableMetadata;
-    const groups = this.getGroupData(metaData.groupBy as string, metaData.groups);
+    const groupBy = table.query.groupBy as GroupObject;
+    const groups = this.getGroupData(groupBy.name, table.query.results.groups);
     const colspan = this.wpTableColumns.columnCount + 1;
 
     jQuery(`.${rowGroupClassName}`).each((i:number, oldRow:HTMLElement) => {
