@@ -21,7 +21,7 @@ export const internalDetailsColumn = {
 } as QueryColumn;
 
 export const internalTimelinesColumn = {
-  id: '__internal-timelines';
+  id: '__internal-timelines'
 } as QueryColumn;
 
 export class SingleRowBuilder {
@@ -53,7 +53,7 @@ export class SingleRowBuilder {
    * Returns the current set of columns, augmented by the internal columns
    * we add for buttons and timeline.
    */
-  public get augmentedColumns():string[] {
+  public get augmentedColumns():QueryColumn[] {
    const editColums = (this.states.table.columns.getCurrentValue() || []);
 
    return editColums.concat(internalDetailsColumn, internalTimelinesColumn);
@@ -65,6 +65,8 @@ export class SingleRowBuilder {
         return this.timelineCellBuilder.build(workPackage);
       case internalDetailsColumn.id:
         return this.detailsLinkBuilder.build(workPackage);
+      default:
+        return this.cellBuilder.build(workPackage, column.id);
     }
   }
 
