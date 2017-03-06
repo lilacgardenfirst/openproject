@@ -39,7 +39,7 @@ export class GroupedRowsBuilder extends RowsBuilder {
    * The hierarchy builder is only applicable if the hierachy mode is active
    */
   public isApplicable(table:WorkPackageTable, metaData:WorkPackageTableMetadata) {
-    return !!this.groups;
+    return !_.isEmpty(this.groups);
   }
 
   /**
@@ -91,7 +91,6 @@ export class GroupedRowsBuilder extends RowsBuilder {
    * The API sadly doesn't provide us with the information which group a WP belongs to.
    */
   private matchingGroup(workPackage:WorkPackageResource, groups:GroupObject[]) {
-    debugger
     return _.find(groups, (group:GroupObject) => {
       let property = workPackage[this.groupByProperty(group)]
       // explicitly check for undefined as `false` (bool) is a valid value.
