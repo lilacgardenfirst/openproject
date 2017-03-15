@@ -74,12 +74,6 @@ export class States {
     stopAllSubscriptions:new Subject()
   };
 
-  // Query states
-  //query = {
-  //  // All available columns for selection
-  //  availableColumns: new State<QueryColumn[]>()
-  //};
-
   // Current focused work package (e.g, row preselected for details button)
   focusedWorkPackage = new State<string>();
 
