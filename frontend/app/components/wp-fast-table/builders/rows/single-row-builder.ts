@@ -43,13 +43,18 @@ export class SingleRowBuilder {
   }
 
   /**
+   * Returns the current set of columns
+   */
+  public get columns():QueryColumn[] {
+    return this.wpTableColumns.getColumns();
+  }
+
+  /**
    * Returns the current set of columns, augmented by the internal columns
    * we add for buttons and timeline.
    */
   public get augmentedColumns():QueryColumn[] {
-    const editColums = (this.wpTableColumns.getColumns() || []);
-
-    return editColums.concat(internalDetailsColumn, internalTimelinesColumn);
+    return this.columns.concat(internalDetailsColumn, internalTimelinesColumn);
   }
 
   public buildCell(workPackage:WorkPackageResource, column:QueryColumn):HTMLElement {
