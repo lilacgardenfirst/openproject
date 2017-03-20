@@ -67,7 +67,8 @@ export class WorkPackageInlineCreateController {
     private v3Path:any,
     private PathHelper:any,
     private AuthorisationService:any,
-    private $q:ng.IQService
+    private $q:ng.IQService,
+    private I18n:op.I18n
   ) {
     this.rowBuilder = new InlineCreateRowBuilder($scope, this.table);
     this.text = {
