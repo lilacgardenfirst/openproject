@@ -84,7 +84,7 @@ function queryFiltersDirective($timeout:ng.ITimeoutService,
               return;
             }
 
-            scope.filters = angular.copy(wpTableFilters.currentState);
+            scope.filters = _.cloneDeep(wpTableFilters.currentState);
 
             updateRemainingFilters();
           }

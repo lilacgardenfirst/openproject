@@ -88,12 +88,11 @@ export class WorkPackagesListChecksumService {
   }
 
   private isChecksumDifferent(otherChecksum:string) {
-    return this.checksum &&
-      otherChecksum !== this.checksum;
+    return otherChecksum !== this.checksum;
   }
 
   private isChecksumDifferentWithoutColumns(otherChecksum:string) {
-    return this.checksum &&
+    return !this.checksum ||
       this.paramsStringWithoutColumns(otherChecksum) !== this.paramsStringWithoutColumns(this.checksum);
   }
 

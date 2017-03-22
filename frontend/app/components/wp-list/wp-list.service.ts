@@ -113,6 +113,17 @@ export class WorkPackagesListService {
     return this.loadResultsList(query, pagination)
   }
 
+  /**
+   * Reload the list of work packages for the current query but loading the first page
+   */
+  public loadCurrentResultsListFirstPage():ng.IPromise<WorkPackageCollectionResource> {
+    let pagination = this.getPaginationInfo();
+    pagination.offset = 1;
+    let query = this.states.table.query.getCurrentValue()!;
+
+    return this.loadResultsList(query, pagination)
+  }
+
   public loadForm(query:QueryResource):ng.IPromise<QueryFormResource>{
     return this.QueryFormDm.load(query).then((form:QueryFormResource) => {
       this.updateStatesFromForm(query, form);

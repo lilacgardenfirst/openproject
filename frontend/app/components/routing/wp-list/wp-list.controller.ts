@@ -89,28 +89,20 @@ function WorkPackagesListController($scope:any,
     });
 
     Observable.combineLatest(
-      wpTablePagination.observeOnScope($scope),
-      wpTableFilters.observeOnScope($scope),
       wpTableColumns.observeOnScope($scope),
       wpTableSortBy.observeOnScope($scope),
       wpTableGroupBy.observeOnScope($scope),
       wpTableSum.observeOnScope($scope)
-    ).subscribe(([pagination, filters, columns, sortBy, groupBy, sums]) => {
-
-      // The combineLatest retains the last value of each observable regardless of
-      // whether it has become null|undefined in the meantime.
-      // As we alter the query's property from it's dependent states, we have to ensure
-      // that we do not set them if he dependent state does depend on another query with
-      // the value only being available because it is still retained.
+    ).subscribe(([columns, sortBy, groupBy, sums]) => {
       if (isAnyDependentStateClear()) {
         return;
       }
 
       let query = states.table.query.getCurrentValue()!;
+      let pagination = wpTablePagination.current;
 
       query.sortBy = sortBy.current;
       query.groupBy = groupBy.current;
-      query.filters = filters.current;
       query.columns = columns.current;
       query.sums = sums.current;
 
@@ -119,6 +111,44 @@ function WorkPackagesListController($scope:any,
       wpListChecksumService.executeIfDifferent(query as QueryResource,
                                                pagination,
                                                updateResultsVisibly);
+    });
+
+
+
+    wpTablePagination.observeOnScope($scope).subscribe(pagination => {
+      let query = states.table.query.getCurrentValue();
+
+      if (!query) {
+        return;
+      }
+
+      wpListChecksumService.executeIfDifferent(query as QueryResource,
+                                               pagination,
+                                               updateResultsVisibly);
+    });
+
+    wpTableFilters.observeOnScope($scope).subscribe(filters => {
+      if (isAnyDependentStateClear()) {
+        return;
+      }
+
+      let query = states.table.query.getCurrentValue();
+
+      if (!query || _.isEqual(query.filters, filters.current)) {
+        return;
+      }
+
+      let pagination = wpTablePagination.current;
+
+      query.filters = _.cloneDeep(filters.current);
+
+      states.table.query.put(query);
+
+      wpListChecksumService.executeIfDifferent(query as QueryResource,
+                                               pagination,
+                                               () => {
+                                                 updateResultsVisibly(true);
+                                               });
     });
   }
 
@@ -142,9 +172,18 @@ function WorkPackagesListController($scope:any,
     return wpListService.reloadCurrentResultsList()
   }
 
-  function updateResultsVisibly() {
-    loadingIndicator.table.promise = updateResults();
+  function updateToFirstResultsPage() {
+    return wpListService.loadCurrentResultsListFirstPage();
   }
+
+  function updateResultsVisibly(firstPage:boolean = false) {
+    if (firstPage) {
+      loadingIndicator.table.promise = updateToFirstResultsPage();
+    } else {
+      loadingIndicator.table.promise = updateResults();
+    }
+  }
+
 
   $scope.allowed = function(model:string, permission: string) {
     return AuthorisationService.can(model, permission);
@@ -176,6 +215,11 @@ function WorkPackagesListController($scope:any,
                                               loadQuery)
     });
 
+  // The combineLatest retains the last value of each observable regardless of
+  // whether it has become null|undefined in the meantime.
+  // As we alter the query's property from it's dependent states, we have to ensure
+  // that we do not set them if he dependent state does depend on another query with
+  // the value only being available because it is still retained.
   function isAnyDependentStateClear() {
     return !states.table.pagination.getCurrentValue() ||
            !states.table.filters.getCurrentValue() ||

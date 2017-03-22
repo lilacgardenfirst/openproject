@@ -49,10 +49,12 @@ function queryFilterDirective($animate:any,
 
       scope.availableOperators = scope.filter.schema.availableOperators;
 
-      scope.$watch('filter.operator', function(operator:QueryOperatorResource) {
+      scope.$watchCollection('filter.operator', function(operator:QueryOperatorResource, oldOperator:QueryOperatorResource) {
         scope.showValuesInput = scope.filter.currentSchema.isValueRequired();
 
-        putStateIfComplete();
+        if (!_.isEqual(operator, oldOperator)) {
+          putStateIfComplete();
+        }
       });
 
       function putStateIfComplete() {
