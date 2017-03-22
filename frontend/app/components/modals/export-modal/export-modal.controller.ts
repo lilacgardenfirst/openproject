@@ -80,6 +80,8 @@ class ExportModalController {
       identifier = identifier.replace('+xml', '');
     }
 
+    identifier = identifier.replace('.', '-');
+
     return identifier;
   }
 }
