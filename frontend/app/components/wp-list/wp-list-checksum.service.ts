@@ -1,6 +1,6 @@
 // -- copyright
 // OpenProject is a project management system.
-// Copyright (C) 2012-2015 the OpenProject Foundation (OPF)
+// Copyright (C) 2012-2017 the OpenProject Foundation (OPF)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3.
@@ -38,9 +38,9 @@ export class WorkPackagesListChecksumService {
   public checksum:string|null;
   public visibleChecksum:string|null;
 
-  public executeIfDifferent(query:QueryResource,
-                            pagination:WorkPackageTablePagination,
-                            callback:Function) {
+  public updateIfDifferent(query:QueryResource,
+                           pagination:WorkPackageTablePagination,
+                           ) {
 
     let newQueryChecksum = this.getNewChecksum(query, pagination);
 
@@ -55,11 +55,22 @@ export class WorkPackagesListChecksumService {
       this.visibleChecksum = newQueryChecksum;
     }
 
-    if (this.isChecksumDifferentWithoutColumns(newQueryChecksum)) {
-      callback();
-    }
+    this.set(query.id, newQueryChecksum);
+  }
+
+  public update(query:QueryResource, pagination:WorkPackageTablePagination) {
+    let newQueryChecksum = this.getNewChecksum(query, pagination);
 
     this.set(query.id, newQueryChecksum);
+
+    this.maintainUrlQueryState(query.id, newQueryChecksum)
+  }
+
+  public isQueryOutdated(query:QueryResource,
+                         pagination:WorkPackageTablePagination) {
+    let newQueryChecksum = this.getNewChecksum(query, pagination);
+
+    return this.isOutdated(query.id, newQueryChecksum);
   }
 
   public executeIfOutdated(newId:number,
@@ -72,28 +83,35 @@ export class WorkPackagesListChecksumService {
     }
   }
 
+  public setQueryParams(query:QueryResource, pagination:WorkPackageTablePagination) {
+    let newQueryChecksum = this.getNewChecksum(query, pagination);
+
+    this.set(query.id, newQueryChecksum);
+
+    this.maintainUrlQueryState(query.id, newQueryChecksum)
+  }
+
   private set(id:number|null, checksum:string) {
     this.id = id;
     this.checksum = checksum;
   }
 
-  private clear() {
+  public clear() {
     this.id = null;
     this.checksum = null;
     this.visibleChecksum = null;
   }
 
+  private isUninitialized() {
+    return !this.id && !this.checksum && !this.visibleChecksum;
+  }
+
   private isIdDifferent(otherId:number|null) {
-    return this.id !== otherId;
+    return this.id && this.id !== otherId;
   }
 
   private isChecksumDifferent(otherChecksum:string) {
-    return otherChecksum !== this.checksum;
-  }
-
-  private isChecksumDifferentWithoutColumns(otherChecksum:string) {
-    return !this.checksum ||
-      this.paramsStringWithoutColumns(otherChecksum) !== this.paramsStringWithoutColumns(this.checksum);
+    return this.checksum && otherChecksum !== this.checksum;
   }
 
   private isOutdated(otherId:number|null, otherChecksum:string|null) {
@@ -101,12 +119,6 @@ export class WorkPackagesListChecksumService {
       ((this.id !== otherId) ||
       (this.id === otherId && (otherChecksum && (otherChecksum !== this.checksum))) ||
        (this.checksum && !otherChecksum && this.visibleChecksum)));
-  }
-
-  private paramsStringWithoutColumns(paramsString:string) {
-    let parsedString = JSON.parse(paramsString);
-    delete(parsedString['c'])
-    return JSON.stringify(parsedString);
   }
 
   private getNewChecksum(query:QueryResource, pagination:WorkPackageTablePagination) {

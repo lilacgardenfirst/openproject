@@ -86,34 +86,13 @@ function WorkPackagesListController($scope:any,
       $scope.tableInformationLoaded = true;
 
       updateTitle(query);
-    });
 
-    Observable.combineLatest(
-      wpTableColumns.observeOnScope($scope),
-      wpTableSortBy.observeOnScope($scope),
-      wpTableGroupBy.observeOnScope($scope),
-      wpTableSum.observeOnScope($scope)
-    ).subscribe(([columns, sortBy, groupBy, sums]) => {
-      if (isAnyDependentStateClear()) {
-        return;
-      }
-
-      let query = states.table.query.getCurrentValue()!;
       let pagination = wpTablePagination.current;
-
-      query.sortBy = sortBy.current;
-      query.groupBy = groupBy.current;
-      query.columns = columns.current;
-      query.sums = sums.current;
-
-      states.table.query.put(query);
-
-      wpListChecksumService.executeIfDifferent(query as QueryResource,
-                                               pagination,
-                                               updateResultsVisibly);
+      if (pagination) {
+        wpListChecksumService.updateIfDifferent(query,
+                                                pagination);
+      }
     });
-
-
 
     wpTablePagination.observeOnScope($scope).subscribe(pagination => {
       let query = states.table.query.getCurrentValue();
@@ -122,34 +101,55 @@ function WorkPackagesListController($scope:any,
         return;
       }
 
-      wpListChecksumService.executeIfDifferent(query as QueryResource,
-                                               pagination,
-                                               updateResultsVisibly);
+      if (wpListChecksumService.isQueryOutdated(query, pagination)) {
+        wpListChecksumService.update(query, pagination);
+
+        updateResultsVisibly();
+      }
     });
+
 
     wpTableFilters.observeOnScope($scope).subscribe(filters => {
-      if (isAnyDependentStateClear()) {
-        return;
-      }
-
-      let query = states.table.query.getCurrentValue();
-
-      if (!query || _.isEqual(query.filters, filters.current)) {
-        return;
-      }
-
-      let pagination = wpTablePagination.current;
-
-      query.filters = _.cloneDeep(filters.current);
-
-      states.table.query.put(query);
-
-      wpListChecksumService.executeIfDifferent(query as QueryResource,
-                                               pagination,
-                                               () => {
-                                                 updateResultsVisibly(true);
-                                               });
+      updateAndExecuteIfAltered(filters.current, 'filters', true);
     });
+
+    wpTableGroupBy.observeOnScope($scope).subscribe(groupBy => {
+      updateAndExecuteIfAltered(groupBy.current, 'groupBy', true);
+    });
+
+    wpTableSortBy.observeOnScope($scope).subscribe(sortBy => {
+      updateAndExecuteIfAltered(sortBy.current, 'sortBy', true);
+    });
+
+    wpTableSum.observeOnScope($scope).subscribe(sums => {
+      updateAndExecuteIfAltered(sums.current, 'sums', true);
+    });
+
+    wpTableColumns.observeOnScope($scope).subscribe(columns => {
+      updateAndExecuteIfAltered(columns.current, 'columns')
+    });
+  }
+
+  function updateAndExecuteIfAltered(updateData:any, name:string, triggerUpdate:boolean = false) {
+    if (isAnyDependentStateClear()) {
+      return;
+    }
+
+    let query = states.table.query.getCurrentValue();
+
+    if (!query || _.isEqual(query[name], updateData)) {
+      return;
+    }
+
+    let pagination = wpTablePagination.current;
+
+    query[name] = _.cloneDeep(updateData);
+
+    states.table.query.put(query);
+
+    if (triggerUpdate) {
+      updateResultsVisibly(true);
+    }
   }
 
   function loadQuery() {
