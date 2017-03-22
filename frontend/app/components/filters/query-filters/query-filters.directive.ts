@@ -60,10 +60,13 @@ function queryFiltersDirective($timeout:ng.ITimeoutService,
           scope.$watch('filterToBeAdded', function (filter:any) {
             if (filter) {
               scope.filterToBeAdded = undefined;
-              scope.filters.add(filter);
+              let newFilter = scope.filters.add(filter);
               var index = currentFilterLength();
               updateFilterFocus(index);
-              initialize();
+
+              if (newFilter.isCompletelyDefined()) {
+                wpTableFilters.replace(scope.filters);
+              }
             }
           });
 

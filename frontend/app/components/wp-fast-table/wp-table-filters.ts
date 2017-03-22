@@ -54,6 +54,8 @@ export class WorkPackageTableFilters {
     let newFilter = QueryFilterInstanceResource.fromSchema(schema!);
 
     this.current.push(newFilter);
+
+    return newFilter;
   }
 
   public remove(filter:QueryFilterInstanceResource) {

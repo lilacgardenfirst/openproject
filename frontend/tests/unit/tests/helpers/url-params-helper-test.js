@@ -270,7 +270,7 @@ describe('UrlParamsHelper', function() {
               operator: '=',
               values: ['val2val', '7val7']
             }
-          },
+          }
         ]),
         showSums: false,
         sortBy: '[]'

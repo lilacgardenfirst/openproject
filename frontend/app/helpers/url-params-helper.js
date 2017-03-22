@@ -111,7 +111,7 @@ module.exports = function(I18n, PaginationService, PathHelper) {
       if(properties.f) {
         var filters = properties.f.map(function(urlFilter) {
           var attributes =  {
-            operator: decodeURIComponent(urlFilter.o),
+            operator: decodeURIComponent(urlFilter.o)
           }
           if(urlFilter.v) {
             // the array check is only there for backwards compatibility reasons.

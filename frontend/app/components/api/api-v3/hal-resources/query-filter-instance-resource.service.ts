@@ -87,6 +87,10 @@ export class QueryFilterInstanceResource extends HalResource {
                                              //TODO: check if name property can be removed alltogether
                                              name: filter.name });
   }
+
+  public isCompletelyDefined() {
+    return this.values.length || (this.currentSchema && !this.currentSchema.isValueRequired());
+  }
 }
 
 function queryFilterInstanceResource() {

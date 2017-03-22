@@ -58,13 +58,9 @@ function queryFilterDirective($animate:any,
       });
 
       function putStateIfComplete() {
-        if (isFilterComplete()) {
+        if (scope.filter.isCompletelyDefined()) {
           wpTableFilters.replace(scope.filters);
         }
-      }
-
-      function isFilterComplete() {
-        return scope.filter.values.length || !scope.filter.currentSchema.isValueRequired();
       }
     }
   };
