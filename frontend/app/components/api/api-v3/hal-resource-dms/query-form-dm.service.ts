@@ -37,7 +37,17 @@ export class QueryFormDmService {
   }
 
   public load(query:QueryResource):ng.IPromise<FormResource> {
-    return query.$links.update();
+    let payload:any = {};
+
+    if (query.project) {
+      payload['_links'] = {
+        'project': {
+          'href': query.project.$href
+        }
+      }
+    }
+
+    return query.$links.update(payload);
   }
 }
 
