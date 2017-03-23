@@ -26,23 +26,23 @@
 // See doc/COPYRIGHT.rdoc for more details.
 // ++
 
-//import {QueryColumn} from '../../api/api-v3/hal-resources/query-resource.service';
-//import {QueryResource} from '../../api/api-v3/hal-resources/query-resource.service';
-//import {QuerySchemaResourceInterface} from '../../api/api-v3/hal-resources/query-schema-resource.service';
-//import {
-//  QuerySortByResource,
-//  QUERY_SORT_BY_ASC,
-//  QUERY_SORT_BY_DESC
-//} from '../../api/api-v3/hal-resources/query-sort-by-resource.service';
-//import {opServicesModule} from '../../../angular-modules';
-//import {States} from '../../states.service';
+import {States} from '../../states.service';
 import {State} from '../../../helpers/reactive-fassade';
 import {WorkPackageTableBaseInterface} from '../wp-table-base';
 import {QueryResource} from '../../api/api-v3/hal-resources/query-resource.service';
 import {QuerySchemaResourceInterface} from '../../api/api-v3/hal-resources/query-schema-resource.service';
 
+export type TableStateStates = 'columns' | 'groupBy'
+
 export abstract class WorkPackageTableBaseService {
-  protected state:State<any>;
+  protected abstract stateName: TableStateStates;
+
+  constructor(protected states: States) {
+  }
+
+  protected get state():State<any> {
+    return this.states.table[this.stateName];
+  };
 
   public initialize(query:QueryResource, schema?:QuerySchemaResourceInterface) {
     let state = this.create(query, schema);
@@ -53,14 +53,14 @@ export abstract class WorkPackageTableBaseService {
   protected abstract create(query:QueryResource, schema?:QuerySchemaResourceInterface):WorkPackageTableBaseInterface
 
   public update(query:QueryResource|null, schema?:QuerySchemaResourceInterface) {
-    let currentState = this.current;
+    let currentState = this.currentState;
 
     currentState.update(query, schema);
 
     this.state.put(currentState);
   }
 
-  protected get current():WorkPackageTableBaseInterface {
+  protected get currentState():WorkPackageTableBaseInterface {
     return this.state.getCurrentValue()!;
   }
 

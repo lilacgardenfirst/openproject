@@ -36,11 +36,9 @@ export class WorkPackagesListChecksumService {
 
   public id:number|null;
   public checksum:string|null;
-  public visibleChecksum:string|null;
 
   public updateIfDifferent(query:QueryResource,
-                           pagination:WorkPackageTablePagination,
-                           ) {
+                           pagination:WorkPackageTablePagination) {
 
     let newQueryChecksum = this.getNewChecksum(query, pagination);
 
@@ -51,8 +49,6 @@ export class WorkPackagesListChecksumService {
 
     } else if (this.isChecksumDifferent(newQueryChecksum)) {
       this.maintainUrlQueryState(query.id, newQueryChecksum)
-
-      this.visibleChecksum = newQueryChecksum;
     }
 
     this.set(query.id, newQueryChecksum);
@@ -99,11 +95,10 @@ export class WorkPackagesListChecksumService {
   public clear() {
     this.id = null;
     this.checksum = null;
-    this.visibleChecksum = null;
   }
 
   private isUninitialized() {
-    return !this.id && !this.checksum && !this.visibleChecksum;
+    return !this.id && !this.checksum;
   }
 
   private isIdDifferent(otherId:number|null) {
@@ -118,7 +113,7 @@ export class WorkPackagesListChecksumService {
     return ((this.id || this.checksum) &&
       ((this.id !== otherId) ||
       (this.id === otherId && (otherChecksum && (otherChecksum !== this.checksum))) ||
-       (this.checksum && !otherChecksum && this.visibleChecksum)));
+       (this.checksum && !otherChecksum)));
   }
 
   private getNewChecksum(query:QueryResource, pagination:WorkPackageTablePagination) {

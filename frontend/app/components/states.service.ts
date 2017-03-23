@@ -37,42 +37,7 @@ export class States {
   types = new MultiState<TypeResource>();
 
   // Work package table states
-  table = {
-    // the query associated with the table
-    query : new State<QueryResource>(),
-    // the results associated with the table
-    results : new State<WorkPackageCollectionResource>(),
-    // the query form associated with the table
-    form : new State<QueryFormResource>(),
-    // Set of work package IDs in strict order of appearance
-    rows: new State<WorkPackageResource[]>(),
-    // all groups returned as results
-    groups: new State<GroupObject[]>(),
-    // Set of columns in strict order of appearance
-    columns: new State<WorkPackageTableColumns>(),
-    // Set of filters
-    filters: new State<WorkPackageTableFilters>(),
-    // Active and available sort by
-    sortBy: new State<WorkPackageTableSortBy>(),
-    // Active and available group by
-    groupBy: new State<WorkPackageTableGroupBy>(),
-    // is query summed
-    sum: new State<WorkPackageTableSum>(),
-    // pagination information
-    pagination: new State<WorkPackageTablePagination>(),
-    // Table row selection state
-    selection: new State<WPTableRowSelectionState>(),
-    // Current state of collapsed groups (if any)
-    collapsedGroups: new State<{[identifier:string]: boolean}>(),
-    // Hierarchies of table
-    hierarchies: new State<WPTableHierarchyState>(),
-    // State to be updated when the table is up to date
-    rendered:new State<WorkPackageTable>(),
-    // State to determine timeline visibility
-    timelineVisible: new State<boolean>(),
-    // Subject used to unregister all listeners of states above.
-    stopAllSubscriptions:new Subject()
-  };
+  table = new TableState();
 
   // Current focused work package (e.g, row preselected for details button)
   focusedWorkPackage = new State<string>();
@@ -87,7 +52,43 @@ export class States {
       });
     });
   }
+}
 
+export class TableState {
+  // the query associated with the table
+  query = new State<QueryResource>();
+  // the results associated with the table
+  results = new State<WorkPackageCollectionResource>();
+  // the query form associated with the table
+  form = new State<QueryFormResource>();
+  // Set of work package IDs in strict order of appearance
+  rows = new State<WorkPackageResource[]>();
+  // all groups returned as results
+  groups = new State<GroupObject[]>();
+  // Set of columns in strict order of appearance
+  columns = new State<WorkPackageTableColumns>();
+  // Set of filters
+  filters = new State<WorkPackageTableFilters>();
+  // Active and available sort by
+  sortBy = new State<WorkPackageTableSortBy>();
+  // Active and available group by
+  groupBy = new State<WorkPackageTableGroupBy>();
+  // is query summed
+  sum = new State<WorkPackageTableSum>();
+  // pagination information
+  pagination = new State<WorkPackageTablePagination>();
+  // Table row selection state
+  selection = new State<WPTableRowSelectionState>();
+  // Current state of collapsed groups (if any)
+  collapsedGroups = new State<{[identifier:string]: boolean}>();
+  // Hierarchies of table
+  hierarchies = new State<WPTableHierarchyState>();
+  // State to be updated when the table is up to date
+  rendered = new State<WorkPackageTable>();
+  // State to determine timeline visibility
+  timelineVisible = new State<boolean>();
+  // Subject used to unregister all listeners of states above.
+  stopAllSubscriptions = new Subject();
 }
 
 opServicesModule.service('states', States);

@@ -170,6 +170,10 @@ export class HalResource {
     return angular.copy(this.$source);
   }
 
+  public $copy() {
+    return this.constructor(this.$source);
+  }
+
   protected $initialize(source:any) {
     this.$source = source.$source || source;
     initializeResource(this);

@@ -38,7 +38,6 @@ import {WorkPackageTableFiltersService} from '../../wp-fast-table/state/wp-table
 import {WorkPackageTableSumService} from '../../wp-fast-table/state/wp-table-sum.service';
 import {WorkPackageTablePaginationService} from '../../wp-fast-table/state/wp-table-pagination.service';
 import {WorkPackageTablePagination} from '../../wp-fast-table/wp-table-pagination';
-import {Observable} from 'rxjs/Observable';
 import {LoadingIndicatorService} from '../../common/loading-indicator/loading-indicator.service';
 import {QueryResource, QueryColumn} from '../../api/api-v3/hal-resources/query-resource.service';
 import {QueryFormResource} from '../../api/api-v3/hal-resources/query-form-resource.service';
@@ -109,6 +108,7 @@ function WorkPackagesListController($scope:any,
     });
 
 
+    // TODO check if we can instead rely on observe until
     wpTableFilters.observeOnScope($scope).subscribe(filters => {
       updateAndExecuteIfAltered(filters.current, 'filters', true);
     });
@@ -153,6 +153,7 @@ function WorkPackagesListController($scope:any,
   }
 
   function loadQuery() {
+    wpListChecksumService.clear();
     loadingIndicator.table.promise = wpListService.fromQueryParams($state.params, $scope.projectIdentifier);
   }
 

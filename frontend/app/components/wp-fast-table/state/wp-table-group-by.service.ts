@@ -33,19 +33,21 @@ import {
 import {QuerySchemaResourceInterface} from '../../api/api-v3/hal-resources/query-schema-resource.service';
 import {QueryGroupByResource} from '../../api/api-v3/hal-resources/query-group-by-resource.service';
 import {opServicesModule} from '../../../angular-modules';
-import {States} from '../../states.service';
+import {
+  States
+} from '../../states.service';
 import {State} from '../../../helpers/reactive-fassade';
 import {WorkPackageTableGroupBy} from '../wp-table-group-by';
-import {WorkPackageTableBaseService} from './wp-table-base.service';
+import {
+  WorkPackageTableBaseService,
+  TableStateStates
+} from './wp-table-base.service';
 
 export class WorkPackageTableGroupByService extends WorkPackageTableBaseService {
-  protected state:State<WorkPackageTableGroupBy>;
+  protected stateName = 'groupBy' as TableStateStates;
 
-  constructor(public states: States) {
-    "ngInject";
-    super();
-
-    this.state = states.table.groupBy;
+  constructor(protected states: States) {
+    super(states)
   }
 
   protected create(query:QueryResource, schema:QuerySchemaResourceInterface) {
@@ -53,11 +55,11 @@ export class WorkPackageTableGroupByService extends WorkPackageTableBaseService 
   }
 
   public isGroupable(column:QueryColumn):boolean {
-    return !!this.current.isGroupable(column);
+    return !!this.currentState.isGroupable(column);
   }
 
   public set(groupBy:QueryGroupByResource) {
-    let currentState = this.current;
+    let currentState = this.currentState;
 
     currentState.current = groupBy;
 
@@ -65,43 +67,35 @@ export class WorkPackageTableGroupByService extends WorkPackageTableBaseService 
   }
 
   public setBy(column:QueryColumn) {
-    let currentState = this.current;
+    let currentState = this.currentState;
 
     currentState.setBy(column);
 
     this.state.put(currentState);
   }
 
-  protected get current():WorkPackageTableGroupBy {
+  protected get currentState():WorkPackageTableGroupBy {
     return this.state.getCurrentValue() as WorkPackageTableGroupBy;
   }
 
-  public get currentGroupBy():QueryGroupByResource|undefined {
-    if (this.current) {
-      return this.current.current;
+  public get current():QueryGroupByResource|undefined {
+    if (this.currentState) {
+      return this.currentState.current;
     } else {
       return undefined;
     }
   }
 
   public get isEnabled():boolean {
-    return !!this.currentGroupBy;
+    return !!this.current;
   }
 
-  public get availableGroupBys():QueryGroupByResource[] {
-    return this.current.available;
+  public get available():QueryGroupByResource[] {
+    return this.currentState.available;
   }
 
   public isCurrentlyGroupedBy(column:QueryColumn):boolean {
-    return this.current.isCurrentlyGroupedBy(column);
-  }
-
-  public observeOnScope(scope:ng.IScope) {
-    return this.state.observeOnScope(scope);
-  }
-
-  public onReady(scope:ng.IScope) {
-    return this.state.observeOnScope(scope).take(1).mapTo(null).toPromise();
+    return this.currentState.isCurrentlyGroupedBy(column);
   }
 }
 

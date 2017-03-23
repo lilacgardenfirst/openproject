@@ -84,12 +84,15 @@ export class QueryFilterInstanceResource extends HalResource {
                                              schema: schema,
                                              operator: operator,
                                              values: [],
-                                             //TODO: check if name property can be removed alltogether
                                              name: filter.name });
   }
 
   public isCompletelyDefined() {
     return this.values.length || (this.currentSchema && !this.currentSchema.isValueRequired());
+  }
+
+  public $copy() {
+    return this.constructor(this.$source);
   }
 }
 

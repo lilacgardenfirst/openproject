@@ -48,7 +48,7 @@ export class WorkPackageTableFiltersService {
   }
 
   public initialize(query:QueryResource, schema:QuerySchemaResourceInterface) {
-    let filters = _.cloneDeep(query.filters);
+    let filters = _.map(query.filters, filter => filter.$copy());
 
     this.loadCurrentFiltersSchemas(filters).then(() => {
       let newState = new WorkPackageTableFilters(filters, schema);

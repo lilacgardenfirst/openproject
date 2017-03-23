@@ -41,8 +41,8 @@ function GroupingModalController(this:any,
   $scope.vm = {};
 
   wpTableGroupBy.onReady($scope).then(() => {
-    $scope.vm.available = wpTableGroupBy.availableGroupBys;
-    $scope.vm.current = wpTableGroupBy.currentGroupBy;
+    $scope.vm.available = wpTableGroupBy.available;
+    $scope.vm.current = wpTableGroupBy.current;
   });
 
   $scope.updateGroupBy = () => {

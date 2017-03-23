@@ -26,8 +26,13 @@
 // See doc/COPYRIGHT.rdoc for more details.
 // ++
 
-import {WorkPackageTableBaseService} from './wp-table-base.service';
-import {States} from '../../states.service';
+import {
+  WorkPackageTableBaseService,
+  TableStateStates
+} from './wp-table-base.service';
+import {
+  States
+} from '../../states.service';
 import {opServicesModule} from '../../../angular-modules';
 import {State} from '../../../helpers/reactive-fassade';
 import {WPTableRowSelectionState} from '../wp-table.interfaces';
@@ -39,30 +44,21 @@ import {QueryResource} from '../../api/api-v3/hal-resources/query-resource.servi
 import {QuerySchemaResourceInterface} from '../../api/api-v3/hal-resources/query-schema-resource.service';
 
 export class WorkPackageTableColumnsService extends WorkPackageTableBaseService {
+  protected stateName = 'columns' as TableStateStates;
 
-  constructor(public states: States) {
-    super();
-
-    this.state = states.table.columns;
+  constructor(protected states: States) {
+    super(states);
   }
 
   protected create(query:QueryResource, schema:QuerySchemaResourceInterface) {
     return new WorkPackageTableColumns(query, schema)
   }
 
-//  public update(query:QueryResource|null, schema?:QuerySchemaResourceInterface) {
-//    let currentState = this.current;
-//
-//    currentState.update(query, schema);
-//
-//    this.state.put(currentState);
-//  }
-
   /**
    * Retrieve the QueryColumn objects for the selected columns
    */
   public getColumns():any[] {
-    return (this.current && this.current.getColumns()) || [];
+    return (this.currentState && this.currentState.getColumns()) || [];
   }
 
   /**
@@ -118,7 +114,7 @@ export class WorkPackageTableColumnsService extends WorkPackageTableBaseService 
    * Update the selected columns to a new set of columns.
    */
   public setColumns(columns:QueryColumn[]) {
-    let currentState = this.current;
+    let currentState = this.currentState;
 
     currentState.current = columns;
 
@@ -197,13 +193,9 @@ export class WorkPackageTableColumnsService extends WorkPackageTableBaseService 
   }
 
 
-  ///**
-  // * Get current selection state.
-  // * @returns {WPTableRowSelectionState}
-  // */
   // TODO check if this can be get rid of
   // only exists to cast the state
-  protected get current():WorkPackageTableColumns {
+  protected get currentState():WorkPackageTableColumns {
     return this.state.getCurrentValue() as WorkPackageTableColumns;
   }
 
@@ -218,7 +210,7 @@ export class WorkPackageTableColumnsService extends WorkPackageTableBaseService 
    * Get all available columns (regardless of whether they are selected already)
    */
   public get all():QueryColumn[] {
-    return this.current.available || [];
+    return this.currentState.available || [];
   }
 
   /**

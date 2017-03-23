@@ -27,7 +27,6 @@
 //++
 
 import {filtersModule} from '../../../angular-modules';
-import {Observable} from 'rxjs/Observable';
 import {QueryFilterInstanceSchemaResource} from '../../api/api-v3/hal-resources/query-filter-instance-schema-resource.service'
 import {QueryFilterInstanceResource} from '../../api/api-v3/hal-resources/query-filter-instance-resource.service'
 import {QueryFilterResource} from '../../api/api-v3/hal-resources/query-filter-resource.service'
