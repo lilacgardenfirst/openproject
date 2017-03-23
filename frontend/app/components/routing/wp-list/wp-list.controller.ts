@@ -81,25 +81,20 @@ function WorkPackagesListController($scope:any,
 
   function setupObservers() {
 
-    states.table.query.observeOnScope($scope).subscribe(query => {
+    states.table.query.observeOnScope($scope).withLatestFrom(
+      wpTablePagination.observeOnScope($scope)
+    ).subscribe(([query, pagination]) => {
       $scope.tableInformationLoaded = true;
 
       updateTitle(query);
 
-      let pagination = wpTablePagination.current;
-      if (pagination) {
-        wpListChecksumService.updateIfDifferent(query,
-                                                pagination);
-      }
+      wpListChecksumService.updateIfDifferent(query,
+                                              pagination);
     });
 
-    wpTablePagination.observeOnScope($scope).subscribe(pagination => {
-      let query = states.table.query.getCurrentValue();
-
-      if (!query) {
-        return;
-      }
-
+    wpTablePagination.observeOnScope($scope).withLatestFrom(
+      states.table.query.observeOnScope($scope)
+    ).subscribe(([pagination, query]) => {
       if (wpListChecksumService.isQueryOutdated(query, pagination)) {
         wpListChecksumService.update(query, pagination);
 
