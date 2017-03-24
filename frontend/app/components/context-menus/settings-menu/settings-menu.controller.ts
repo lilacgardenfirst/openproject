@@ -30,6 +30,7 @@ import {ContextMenuService} from '../context-menu.service';
 import {WorkPackageTableHierarchyService} from '../../wp-fast-table/state/wp-table-hierarchy.service';
 import {WorkPackageTableSumService} from '../../wp-fast-table/state/wp-table-sum.service';
 import {WorkPackageTableGroupByService} from '../../wp-fast-table/state/wp-table-group-by.service';
+import {States} from '../../states.service';
 
 interface IMyScope extends ng.IScope {
   displaySumsLabel:string;
@@ -53,7 +54,6 @@ interface IMyScope extends ng.IScope {
   deleteQueryInvalid:Function;
   showSaveModalInvalid:Function;
   saveQueryInvalid:Function;
-
 }
 
 function SettingsDropdownMenuController($scope:IMyScope,
@@ -72,6 +72,7 @@ function SettingsDropdownMenuController($scope:IMyScope,
                                         wpTableHierarchy:WorkPackageTableHierarchyService,
                                         wpTableSum:WorkPackageTableSumService,
                                         wpTableGroupBy:WorkPackageTableGroupByService,
+                                        states:States,
                                         AuthorisationService:any,
                                         NotificationsService:any) {
 
@@ -82,16 +83,17 @@ function SettingsDropdownMenuController($scope:IMyScope,
   $scope.displaySumsLabel = $scope.displaySums ? I18n.t('js.toolbar.settings.hide_sums')
                                                : I18n.t('js.toolbar.settings.display_sums');
 
+  let form = states.table.form.getCurrentValue()!;
+  let query = states.table.query.getCurrentValue()!;
+
   $scope.saveQuery = function (event:JQueryEventObject) {
     event.stopPropagation();
-    if (!$scope.query.isDirty()) {
-      return;
-    }
-    if ($scope.query.isNew()) {
-      if (allowQueryAction(event, 'create')) {
-        closeAnyContextMenu();
-        saveModal.activate();
-      }
+    //if (!$scope.query.isDirty()) {
+    //  return;
+    //}
+    if (!query.id && allowFormAction(event, 'commit')) {
+      closeAnyContextMenu();
+      saveModal.activate();
     } else {
       if (allowQueryAction(event, 'update')) {
         //QueryService.saveQuery()
@@ -131,7 +133,7 @@ function SettingsDropdownMenuController($scope:IMyScope,
   // Modals
   $scope.showSaveAsModal = function (event:JQueryEventObject) {
     event.stopPropagation();
-    if (allowQueryAction(event, 'create')) {
+    if (allowFormAction(event, 'commit')) {
       showExistingQueryModal.call(saveModal, event);
       updateFocusInModal('save-query-name');
     }
@@ -248,6 +250,15 @@ function SettingsDropdownMenuController($scope:IMyScope,
 
   function allowWorkPackageAction(event:JQueryEventObject, action:any) {
     return allowAction(event, 'work_package', action);
+  }
+
+  function allowFormAction(event:JQueryEventObject, action:string) {
+    if (form.$links[action]) {
+      return true;
+    } else {
+      event.stopPropagation();
+      return false;
+    }
   }
 
   function allowAction(event:JQueryEventObject, modelName:string, action:any) {

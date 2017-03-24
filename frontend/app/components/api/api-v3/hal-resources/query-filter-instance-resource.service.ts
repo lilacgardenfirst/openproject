@@ -80,11 +80,19 @@ export class QueryFilterInstanceResource extends HalResource {
     let operator = (schema.operator.allowedValues as HalResource[])[0];
     let filter = (schema.filter.allowedValues as HalResource[])[0];
 
-    return new QueryFilterInstanceResource({ filter: filter,
-                                             schema: schema,
-                                             operator: operator,
-                                             values: [],
-                                             name: filter.name });
+    let newFilter = new QueryFilterInstanceResource({
+                                                       name: filter.name,
+                                                      _links: {
+                                                        filter: filter.$plain()._links.self,
+                                                        schema: schema.$plain()._links.self,
+                                                        operator: operator.$plain()._links.self,
+                                                        values: []
+                                                      }
+                                                   });
+
+    newFilter.schema = schema;
+
+    return newFilter;
   }
 
   public isCompletelyDefined() {

@@ -29,8 +29,10 @@
 import {QueryResource} from '../hal-resources/query-resource.service';
 import {CollectionResource} from '../hal-resources/collection-resource.service';
 import {WorkPackageCollectionResource} from '../hal-resources/wp-collection-resource.service';
+import {FormResource} from '../hal-resources/form-resource.service';
 import {opApiModule} from '../../../../angular-modules';
 import {HalRequestService} from '../hal-request/hal-request.service';
+import {PayloadDmService} from './payload-dm.service.ts';
 
 export interface PaginationObject {
   pageSize:number,
@@ -40,7 +42,8 @@ export interface PaginationObject {
 export class QueryDmService {
   constructor(protected halRequest:HalRequestService,
               protected v3Path:any,
-              protected UrlParamsHelper:any) {
+              protected UrlParamsHelper:any,
+              protected PayloadDm:PayloadDmService) {
   }
 
   public find(queryData:Object, queryId?:string, projectIdentifier?:string):ng.IPromise<QueryResource> {
@@ -77,6 +80,12 @@ export class QueryDmService {
 
   public save(query:QueryResource) {
     //TODO
+  }
+
+  public create(query:QueryResource, form:FormResource):ng.IPromise<QueryResource> {
+    let payload = this.PayloadDm.extract(query, form.schema);
+
+    return form.commit(payload);
   }
 
   public all(projectIdentifier?:string):ng.IPromise<CollectionResource> {

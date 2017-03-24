@@ -37,7 +37,12 @@ export class QueryFormDmService {
   }
 
   public load(query:QueryResource):ng.IPromise<FormResource> {
-    let payload:any = {};
+    // We need a valid payload so that we
+    // can check whether form saving is possible.
+    // The query needs a name to be valid.
+    let payload:any = {
+      'name': '!!!__O__o__O__!!!'
+    };
 
     if (query.project) {
       payload['_links'] = {

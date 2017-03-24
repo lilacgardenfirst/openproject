@@ -137,6 +137,23 @@ export class WorkPackagesListService {
     this.$location.search('query_id', '');
   }
 
+  public create(name:string) {
+    let query = this.states.table.query.getCurrentValue()!;
+    let form = this.states.table.form.getCurrentValue()!;
+
+    query.name = name;
+
+    let promise = this.QueryDm.create(query, form)
+
+    promise
+      .then(query => {
+        this.NotificationsService.addSuccess(this.I18n.t('js.notice_successful_create'));
+        this.reloadQuery(query);
+      });
+
+    return promise;
+  }
+
   private getPaginationInfo() {
     let pagination = this.wpTablePagination.current;
 

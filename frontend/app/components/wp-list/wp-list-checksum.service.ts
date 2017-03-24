@@ -102,7 +102,7 @@ export class WorkPackagesListChecksumService {
   }
 
   private isIdDifferent(otherId:number|null) {
-    return this.id && this.id !== otherId;
+    return (this.id || otherId) && this.id !== otherId;
   }
 
   private isChecksumDifferent(otherChecksum:string) {
@@ -113,7 +113,7 @@ export class WorkPackagesListChecksumService {
     return ((this.id || this.checksum) &&
       ((this.id !== otherId) ||
       (this.id === otherId && (otherChecksum && (otherChecksum !== this.checksum))) ||
-       (this.checksum && !otherChecksum)));
+       (!this.id && this.checksum && !otherChecksum)));
   }
 
   private getNewChecksum(query:QueryResource, pagination:WorkPackageTablePagination) {
