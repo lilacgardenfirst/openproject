@@ -66,7 +66,8 @@ export class WorkPackagesListService {
               protected I18n:op.I18n) {}
 
   /**
-   * Resolve API experimental and APIv3 requests using queryParams.
+   * Load a query.
+   * The query is either a persisted query, identified by the query_id parameter, or the default query. Both will be modified by the parameters in the query_props parameter.
    */
   public fromQueryParams(queryParams:any, projectIdentifier ?:string):ng.IPromise<QueryResource> {
     var queryData = this.UrlParamsHelper.buildV3GetQueryFromJsonParams(queryParams.query_props);
@@ -80,6 +81,16 @@ export class WorkPackagesListService {
     return this.conditionallyLoadForm(promise);
   }
 
+  /**
+   * Load the default query.
+   */
+  public loadDefaultQuery(projectIdentifier ?:string):ng.IPromise<QueryResource> {
+    return this.fromQueryParams({}, projectIdentifier);
+  }
+
+  /**
+   * Reloads the current query and set the pagination to the first page.
+   */
   public reloadQuery(query:QueryResource):ng.IPromise<QueryResource> {
     let pagination = this.getPaginationInfo();
     pagination.offset = 1;
@@ -108,18 +119,18 @@ export class WorkPackagesListService {
    */
   public reloadCurrentResultsList():ng.IPromise<WorkPackageCollectionResource> {
     let pagination = this.getPaginationInfo();
-    let query = this.states.table.query.getCurrentValue()!;
+    let query = this.currentQuery;
 
     return this.loadResultsList(query, pagination)
   }
 
   /**
-   * Reload the list of work packages for the current query but loading the first page
+   * Reload the first page of work packages for the current query
    */
   public loadCurrentResultsListFirstPage():ng.IPromise<WorkPackageCollectionResource> {
     let pagination = this.getPaginationInfo();
     pagination.offset = 1;
-    let query = this.states.table.query.getCurrentValue()!;
+    let query = this.currentQuery;
 
     return this.loadResultsList(query, pagination)
   }
@@ -132,13 +143,12 @@ export class WorkPackagesListService {
     });
   }
 
-  public clearUrlQueryParams() {
-    this.$location.search('query_props', '');
-    this.$location.search('query_id', '');
-  }
-
+  /**
+   * Persist the current query in the backend.
+   * After the update, the new query is reloaded (e.g. for the work packages)
+   */
   public create(name:string) {
-    let query = this.states.table.query.getCurrentValue()!;
+    let query = this.currentQuery;
     let form = this.states.table.form.getCurrentValue()!;
 
     query.name = name;
@@ -152,6 +162,29 @@ export class WorkPackagesListService {
       });
 
     return promise;
+  }
+
+  /**
+   * Destroy the current query.
+   */
+  public delete() {
+    let query = this.currentQuery;
+
+    let promise = this.QueryDm.delete(query);
+
+    promise
+      .then(() => {
+        this.NotificationsService.addSuccess(this.I18n.t('js.notice_successful_delete'));
+
+        let id;
+        if (query.project) {
+          id = query.project.$href!.split('/').pop();
+        }
+
+        this.loadDefaultQuery(id);
+      });
+
+    return promise
   }
 
   private getPaginationInfo() {
@@ -269,6 +302,10 @@ export class WorkPackagesListService {
     this.states.table.sortBy.clear();
     this.states.table.groupBy.clear();
     this.states.table.sum.clear();
+  }
+
+  private get currentQuery() {
+    return this.states.table.query.getCurrentValue()!;
   }
 }
 

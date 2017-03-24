@@ -30,6 +30,7 @@ import {ContextMenuService} from '../context-menu.service';
 import {WorkPackageTableHierarchyService} from '../../wp-fast-table/state/wp-table-hierarchy.service';
 import {WorkPackageTableSumService} from '../../wp-fast-table/state/wp-table-sum.service';
 import {WorkPackageTableGroupByService} from '../../wp-fast-table/state/wp-table-group-by.service';
+import {WorkPackagesListService} from '../../wp-list/wp-list.service';
 import {States} from '../../states.service';
 
 interface IMyScope extends ng.IScope {
@@ -72,6 +73,7 @@ function SettingsDropdownMenuController($scope:IMyScope,
                                         wpTableHierarchy:WorkPackageTableHierarchyService,
                                         wpTableSum:WorkPackageTableSumService,
                                         wpTableGroupBy:WorkPackageTableGroupByService,
+                                        wpListService:WorkPackagesListService,
                                         states:States,
                                         AuthorisationService:any,
                                         NotificationsService:any) {
@@ -115,18 +117,7 @@ function SettingsDropdownMenuController($scope:IMyScope,
   $scope.deleteQuery = function (event:JQueryEventObject) {
     event.stopPropagation();
     if (allowQueryAction(event, 'delete') && deleteConfirmed()) {
-      //QueryService.deleteQuery()
-      //  .then(function (data:any) {
-      //    if (data.status.isError) {
-      //      NotificationsService.addError(data.status.text);
-      //    }
-      //    else {
-      //      NotificationsService.addSuccess(data.status.text);
-      //      $state.go('work-packages.list',
-      //        {'query_id': null, 'query_props': null},
-      //        {reload: true});
-      //    }
-      //  });
+      wpListService.delete();
     }
   };
 

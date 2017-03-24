@@ -36,6 +36,7 @@ export class WorkPackagesListChecksumService {
 
   public id:number|null;
   public checksum:string|null;
+  public visibleChecksum:string|null;
 
   public updateIfDifferent(query:QueryResource,
                            pagination:WorkPackageTablePagination) {
@@ -79,14 +80,6 @@ export class WorkPackagesListChecksumService {
     }
   }
 
-  public setQueryParams(query:QueryResource, pagination:WorkPackageTablePagination) {
-    let newQueryChecksum = this.getNewChecksum(query, pagination);
-
-    this.set(query.id, newQueryChecksum);
-
-    this.maintainUrlQueryState(query.id, newQueryChecksum)
-  }
-
   private set(id:number|null, checksum:string) {
     this.id = id;
     this.checksum = checksum;
@@ -95,6 +88,7 @@ export class WorkPackagesListChecksumService {
   public clear() {
     this.id = null;
     this.checksum = null;
+    this.visibleChecksum = null;
   }
 
   private isUninitialized() {
@@ -113,7 +107,7 @@ export class WorkPackagesListChecksumService {
     return ((this.id || this.checksum) &&
       ((this.id !== otherId) ||
       (this.id === otherId && (otherChecksum && (otherChecksum !== this.checksum))) ||
-       (!this.id && this.checksum && !otherChecksum)));
+       (!this.id && this.checksum && !otherChecksum && this.visibleChecksum)));
   }
 
   private getNewChecksum(query:QueryResource, pagination:WorkPackageTablePagination) {
@@ -121,6 +115,8 @@ export class WorkPackagesListChecksumService {
   }
 
   private maintainUrlQueryState(id:string|number|null, checksum:string|null) {
+    this.visibleChecksum = checksum;
+
     this.$state.go('.', { query_props: checksum, query_id: id }, { notify: false });
   };
 }

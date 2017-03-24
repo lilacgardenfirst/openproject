@@ -88,6 +88,10 @@ export class QueryDmService {
     return form.commit(payload);
   }
 
+  public delete(query:QueryResource) {
+    return query.delete();
+  }
+
   public all(projectIdentifier?:string):ng.IPromise<CollectionResource> {
     let urlQuery = {};
 

@@ -232,8 +232,6 @@ function WorkPackagesListController($scope:any,
   $rootScope.$on('workPackagesRefreshInBackground', function () {
     updateResults();
   });
-
-  $rootScope.$on('queryClearRequired', _ => wpListService.clearUrlQueryParams);
 }
 
 angular
