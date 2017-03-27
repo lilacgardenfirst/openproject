@@ -46,13 +46,11 @@ import {WorkPackageTablePaginationService} from '../wp-fast-table/state/wp-table
 
 export class WorkPackagesListService {
   constructor(protected apiWorkPackages:any,
-              protected WorkPackageService:any,
-              protected PaginationService:any,
               protected NotificationsService:any,
               protected UrlParamsHelper:any,
               protected AuthorisationService:any,
-              protected $location:ng.ILocationService,
               protected $q:ng.IQService,
+              protected $state:any,
               protected QueryDm:QueryDmService,
               protected QueryFormDm:QueryFormDmService,
               protected states:States,
@@ -63,7 +61,8 @@ export class WorkPackagesListService {
               protected wpTableFilters:WorkPackageTableFiltersService,
               protected wpTableSum:WorkPackageTableSumService,
               protected wpTablePagination:WorkPackageTablePaginationService,
-              protected I18n:op.I18n) {}
+              protected I18n:op.I18n,
+              protected queryMenuItemFactory:any) {}
 
   /**
    * Load a query.
@@ -187,6 +186,24 @@ export class WorkPackagesListService {
     return promise
   }
 
+  public toggleStarred() {
+    let query = this.currentQuery;
+
+    let promise = this.QueryDm.toggleStarred(query);
+
+    let starred = !query.starred;
+
+    promise.then((query) => {
+      this.states.table.query.put(query);
+
+      this.NotificationsService.addSuccess(this.I18n.t('js.notice_successful_update'));
+
+      this.updateQueryMenu()
+    });
+
+    return promise;
+  }
+
   private getPaginationInfo() {
     let pagination = this.wpTablePagination.current;
 
@@ -306,6 +323,26 @@ export class WorkPackagesListService {
 
   private get currentQuery() {
     return this.states.table.query.getCurrentValue()!;
+  }
+
+  private updateQueryMenu() {
+    let query = this.currentQuery;
+
+    if(query.starred) {
+      this
+        .queryMenuItemFactory
+        .generateMenuItem(query.name,
+                          this.$state.href('work-packages.list', { query_id: query.id }),
+                          query.id);
+    } else {
+      this
+        .queryMenuItemFactory
+        .removeMenuItem(query.id);
+    }
+
+    this
+      .queryMenuItemFactory
+      .activateMenuItem();
   }
 }
 

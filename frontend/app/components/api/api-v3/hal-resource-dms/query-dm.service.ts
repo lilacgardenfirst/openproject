@@ -92,6 +92,14 @@ export class QueryDmService {
     return query.delete();
   }
 
+  public toggleStarred(query:QueryResource) {
+    if (query.starred) {
+      return query.unstar() as ng.IPromise<QueryResource>;
+    } else {
+      return query.star() as ng.IPromise<QueryResource>;
+    }
+  }
+
   public all(projectIdentifier?:string):ng.IPromise<CollectionResource> {
     let urlQuery = {};
 

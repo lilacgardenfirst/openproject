@@ -132,7 +132,7 @@ function SettingsDropdownMenuController($scope:IMyScope,
 
   $scope.showShareModal = function (event:JQueryEventObject) {
     event.stopPropagation();
-    if (allowQueryAction(event, 'publicize') || allowQueryAction(event, 'star')) {
+    if (allowQueryAction(event, 'unstar') || allowQueryAction(event, 'star')) {
       showExistingQueryModal.call(shareModal, event);
       updateFocusInModal('show-public');
     }
@@ -199,7 +199,7 @@ function SettingsDropdownMenuController($scope:IMyScope,
   };
 
   $scope.showShareModalInvalid = function () {
-    return (AuthorisationService.cannot('query', 'publicize') &&
+    return (AuthorisationService.cannot('query', 'unstar') &&
     AuthorisationService.cannot('query', 'star'));
   };
 

@@ -49,7 +49,6 @@ module.exports = function($rootScope, $compile, $http, $templateCache, $animate)
 
     function getContainer() {
       return angular.element(options.container);
-
     }
 
     function generateMenuItem(title, path, objectId) {
@@ -77,6 +76,17 @@ module.exports = function($rootScope, $compile, $http, $templateCache, $animate)
         var previousItem = previousMenuItem(title);
         return $animate.enter(menuItem, container, previousItem);
       });
+    }
+
+    function removeMenuItem(id) {
+      $rootScope.$broadcast('openproject.layout.removeMenuItem', {
+        itemType: type,
+        objectId: id
+      });
+    }
+
+    function activateMenuItem() {
+      $rootScope.$broadcast('openproject.layout.activateMenuItem');
     }
 
     /**
@@ -109,6 +119,8 @@ module.exports = function($rootScope, $compile, $http, $templateCache, $animate)
 
     return {
       generateMenuItem: generateMenuItem,
+      removeMenuItem: removeMenuItem,
+      activateMenuItem: activateMenuItem,
       link: linkFn
     };
   };

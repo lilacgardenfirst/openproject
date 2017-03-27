@@ -28,13 +28,15 @@
 
 import {wpControllersModule} from '../../../angular-modules';
 import {States} from '../../states.service';
+import {WorkPackagesListService} from '../../wp-list/wp-list.service';
 
 function ShareModalController(this:any,
                               $scope:any,
                               shareModal:any,
                               states:States,
                               AuthorisationService:any,
-                              NotificationsService:any) {
+                              NotificationsService:any,
+                              wpListService:WorkPackagesListService) {
   this.name = 'Share';
   this.closeMe = shareModal.deactivate;
 
@@ -51,28 +53,13 @@ function ShareModalController(this:any,
 
   $scope.cannot = AuthorisationService.cannot;
 
-//  $scope.saveQuery = () => {
-//    var messageObject:any;
-//
-//    QueryService.saveQuery()
-//      .then((data:any) => {
-//        messageObject = data.status;
-//        if (data.query) {
-//          AuthorisationService.initModelAuth('query', data.query._links);
-//        }
-//
-//        if ($scope.query.starred !== $scope.shareSettings.starred) {
-//          QueryService.toggleQueryStarred($scope.query)
-//            .then((data:any) => {
-//              closeAndReport(data.status || messageObject);
-//              return $scope.query;
-//            });
-//        }
-//        else {
-//          closeAndReport(messageObject);
-//        }
-//      });
-//  };
+  $scope.saveQuery = () => {
+    if ($scope.query.starred !== $scope.shareSettings.starred) {
+      wpListService.toggleStarred().then(() => {
+        shareModal.deactivate();
+      });
+    }
+  };
 }
 
 wpControllersModule.controller('ShareModalController', ShareModalController);
