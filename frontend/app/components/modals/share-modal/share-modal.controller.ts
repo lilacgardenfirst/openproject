@@ -36,14 +36,20 @@ function ShareModalController(this:any,
                               states:States,
                               AuthorisationService:any,
                               NotificationsService:any,
-                              wpListService:WorkPackagesListService) {
+                              wpListService:WorkPackagesListService,
+                              $q:ng.IQService) {
   this.name = 'Share';
   this.closeMe = shareModal.deactivate;
 
-  $scope.query = states.table.query.getCurrentValue()
+  $scope.query = states.table.query.getCurrentValue();
+  let form = states.table.form.getCurrentValue()!;
+
+  $scope.canStar = AuthorisationService.can('query', 'star') || AuthorisationService.can('query', 'unstar');
+  $scope.canPublicize = form.schema.public.writable;
 
   $scope.shareSettings = {
-    starred: !!$scope.query.unstar
+    starred: !!$scope.query.unstar,
+    public: $scope.query.public
   };
 
   function closeAndReport(message:any) {
@@ -51,14 +57,22 @@ function ShareModalController(this:any,
     NotificationsService.addSuccess(message.text);
   }
 
-  $scope.cannot = AuthorisationService.cannot;
-
   $scope.saveQuery = () => {
-    if ($scope.query.starred !== $scope.shareSettings.starred) {
-      wpListService.toggleStarred().then(() => {
-        shareModal.deactivate();
-      });
+    let promises = [];
+
+    if ($scope.query.public !== $scope.shareSettings.public) {
+      $scope.query.public = $scope.shareSettings.public;
+
+      promises.push(wpListService.save($scope.query));
     }
+
+    if ($scope.query.starred !== $scope.shareSettings.starred) {
+      promises.push(wpListService.toggleStarred());
+    }
+
+    $q.all(promises).then(() => {
+      shareModal.deactivate();
+    });
   };
 }
 

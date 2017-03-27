@@ -33,6 +33,7 @@ import {QueryDmService, PaginationObject} from '../api/api-v3/hal-resource-dms/q
 import {QueryFormDmService} from '../api/api-v3/hal-resource-dms/query-form-dm.service';
 import {States} from '../states.service';
 import {SchemaResource} from '../api/api-v3/hal-resources/schema-resource.service';
+import {ErrorResource} from '../api/api-v3/hal-resources/error-resource.service';
 import {WorkPackageCollectionResource} from '../api/api-v3/hal-resources/wp-collection-resource.service';
 import {QuerySchemaResourceInterface} from '../api/api-v3/hal-resources/query-schema-resource.service';
 import {QueryFilterInstanceSchemaResource} from '../api/api-v3/hal-resources/query-filter-instance-schema-resource.service';
@@ -183,7 +184,35 @@ export class WorkPackagesListService {
         this.loadDefaultQuery(id);
       });
 
-    return promise
+    return promise;
+  }
+
+  public save(query?:QueryResource) {
+    query = query || this.currentQuery;
+
+    let form = this.states.table.form.getCurrentValue()!;
+
+    let promise = this.QueryDm.save(query, form);
+
+    promise
+      .then(() => {
+        this.NotificationsService.addSuccess(this.I18n.t('js.notice_successful_update'));
+
+        this
+          .queryMenuItemFactory
+          .renameMenuItem(query!.id, query!.name);
+
+        // We should actually put the query newly received
+        // from the backend in here.
+        // But the backend does currently not return work packages (results).
+        this.states.table.query.put(query!);
+      })
+      .catch((error:ErrorResource) => {
+        this.NotificationsService.addError(error.message);
+      });
+
+
+    return promise;
   }
 
   public toggleStarred() {
@@ -253,11 +282,14 @@ export class WorkPackagesListService {
   }
 
   private updateStatesFromQueryOnPromise(promise:ng.IPromise<QueryResource>):ng.IPromise<QueryResource> {
-    return promise.then(query => {
-      this.updateStatesFromQuery(query);
+    promise
+      .then(query => {
+        this.updateStatesFromQuery(query);
 
-      return query;
-    });
+        return query;
+      });
+
+    return promise;
   }
 
   private updateStatesFromWPListOnPromise(promise:ng.IPromise<WorkPackageCollectionResource>):ng.IPromise<WorkPackageCollectionResource> {

@@ -70,9 +70,9 @@ module.exports = function(menuItemFactory, $state, $stateParams, $animate, $time
         }
       });
 
-      scope.$on('openproject.layout.renameQueryMenuItem', function(event, itemData) {
-        if (itemData.itemType === QUERY_MENU_ITEM_TYPE && itemData.queryId == scope.queryId) {
-          element.html(itemData.queryName);
+      scope.$on('openproject.layout.renameMenuItem', function(event, itemData) {
+        if (itemData.itemType === QUERY_MENU_ITEM_TYPE && itemData.objectId == scope.queryId) {
+          element.html(itemData.objectName);
         }
       });
     }

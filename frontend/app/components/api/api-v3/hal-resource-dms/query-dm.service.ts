@@ -78,8 +78,10 @@ export class QueryDmService {
     return this.halRequest.get(url, queryData, {caching: {enabled: false} });
   }
 
-  public save(query:QueryResource) {
-    //TODO
+  public save(query:QueryResource, form:FormResource) {
+    let payload = this.PayloadDm.extract(query, form.schema);
+
+    return query.updateImmediately(payload);
   }
 
   public create(query:QueryResource, form:FormResource):ng.IPromise<QueryResource> {

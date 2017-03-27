@@ -90,26 +90,12 @@ function SettingsDropdownMenuController($scope:IMyScope,
 
   $scope.saveQuery = function (event:JQueryEventObject) {
     event.stopPropagation();
-    //if (!$scope.query.isDirty()) {
-    //  return;
-    //}
     if (!query.id && allowFormAction(event, 'commit')) {
       closeAnyContextMenu();
       saveModal.activate();
     } else {
-      if (allowQueryAction(event, 'update')) {
-        //QueryService.saveQuery()
-        //  .then(function (data:any) {
-        //    if (data.status.isError) {
-        //      NotificationsService.addError(data.status.text);
-        //    }
-        //    else {
-        //      NotificationsService.addSuccess(data.status.text);
-        //      $state.go('work-packages.list',
-        //        {'query_id': $scope.query.id, 'query_props': null},
-        //        {notify: false});
-        //    }
-        //  });
+      if (query.id && allowQueryAction(event, 'updateImmediately')) {
+        wpListService.save();
       }
     }
   };
@@ -195,7 +181,7 @@ function SettingsDropdownMenuController($scope:IMyScope,
   };
 
   $scope.showSettingsModalInvalid = function () {
-    return AuthorisationService.cannot('query', 'update');
+    return !query.id || AuthorisationService.cannot('query', 'update');
   };
 
   $scope.showShareModalInvalid = function () {

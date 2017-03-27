@@ -28,40 +28,31 @@
 
 
 import {wpControllersModule} from '../../../angular-modules';
+import {States} from '../../states.service';
+import {WorkPackagesListService} from '../../wp-list/wp-list.service';
 
 function SettingsModalController(this:any,
                                  $scope:any,
                                  $rootScope:ng.IRootScopeService,
-                                 QUERY_MENU_ITEM_TYPE:any,
+                                 states:States,
                                  settingsModal:any,
                                  AuthorisationService:any,
-                                 NotificationsService:any) {
+                                 NotificationsService:any,
+                                 wpListService:WorkPackagesListService) {
 
-  //var query = QueryService.getQuery();
+  let query = states.table.query.getCurrentValue()!;
 
   this.name = 'Settings';
   this.closeMe = settingsModal.deactivate;
-  //$scope.queryName = query.name;
+  $scope.queryName = query.name;
 
-  //$scope.updateQuery = () => {
-  //  query.name = $scope.queryName;
-  //  QueryService.saveQuery()
-  //    .then((data:any) => {
-  //      QueryService.updateHighlightName();
-  //      settingsModal.deactivate();
-  //      NotificationsService.addSuccess(data.status.text);
-
-  //      $rootScope.$broadcast('openproject.layout.renameQueryMenuItem', {
-  //        itemType: QUERY_MENU_ITEM_TYPE,
-  //        queryId: query.id,
-  //        queryName: query.name
-  //      });
-
-  //      if (data.query) {
-  //        AuthorisationService.initModelAuth('query', data.query._links);
-  //      }
-  //    });
-  //};
+  $scope.updateQuery = () => {
+    query.name = $scope.queryName;
+    wpListService.save(query)
+      .then((data:any) => {
+        settingsModal.deactivate();
+      });
+  };
 }
 
 wpControllersModule.controller('SettingsModalController', SettingsModalController);

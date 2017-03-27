@@ -85,6 +85,14 @@ module.exports = function($rootScope, $compile, $http, $templateCache, $animate)
       });
     }
 
+    function renameMenuItem(id, name) {
+      $rootScope.$broadcast('openproject.layout.renameMenuItem', {
+        itemType: type,
+        objectId: id,
+        objectName: name
+      });
+    }
+
     function activateMenuItem() {
       $rootScope.$broadcast('openproject.layout.activateMenuItem');
     }
@@ -121,6 +129,7 @@ module.exports = function($rootScope, $compile, $http, $templateCache, $animate)
       generateMenuItem: generateMenuItem,
       removeMenuItem: removeMenuItem,
       activateMenuItem: activateMenuItem,
+      renameMenuItem: renameMenuItem,
       link: linkFn
     };
   };
