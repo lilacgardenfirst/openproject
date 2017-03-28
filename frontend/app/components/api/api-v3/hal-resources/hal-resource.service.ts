@@ -297,7 +297,7 @@ function initializeResource(halResource:HalResource) {
   function setupEmbedded() {
     setupProperty('embedded', element => {
       angular.forEach(element, (child:any, name:string) => {
-        if (child) {
+        if (child && (child._embedded || child._links)) {
           lazy(element, name, () => HalResource.create(child));
         }
       });
