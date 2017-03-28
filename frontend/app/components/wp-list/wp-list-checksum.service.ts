@@ -43,7 +43,9 @@ export class WorkPackagesListChecksumService {
 
     let newQueryChecksum = this.getNewChecksum(query, pagination);
 
-    if (this.isIdDifferent(query.id)) {
+    if (this.isUninitialized()) {
+      // Do nothing
+    } else if (this.isIdDifferent(query.id)) {
       this.maintainUrlQueryState(query.id, null)
 
       this.clear();
