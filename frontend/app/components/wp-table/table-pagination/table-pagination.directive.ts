@@ -90,8 +90,11 @@ function tablePagination(PaginationService:any,
         var truncSize = PaginationService.getOptionsTruncationSize();
 
         var pageNumbers = [];
-        for (var i = 1; i <= Math.ceil(scope.totalEntries / scope.paginationOptions.perPage); i++) {
-          pageNumbers.push(i);
+
+        if (scope.paginationOptions.perPage) {
+          for (var i = 1; i <= Math.ceil(scope.totalEntries / scope.paginationOptions.perPage); i++) {
+            pageNumbers.push(i);
+          }
         }
 
         // This avoids a truncation when there are not enough elements to truncate for the first elements

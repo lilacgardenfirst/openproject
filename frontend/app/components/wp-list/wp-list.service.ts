@@ -36,7 +36,10 @@ import {SchemaResource} from '../api/api-v3/hal-resources/schema-resource.servic
 import {ErrorResource} from '../api/api-v3/hal-resources/error-resource.service';
 import {WorkPackageCollectionResource} from '../api/api-v3/hal-resources/wp-collection-resource.service';
 import {QuerySchemaResourceInterface} from '../api/api-v3/hal-resources/query-schema-resource.service';
+import {QueryFilterResource} from '../api/api-v3/hal-resources/query-filter-resource.service';
+import {QuerySortByResource} from '../api/api-v3/hal-resources/query-sort-by-resource.service';
 import {QueryFilterInstanceSchemaResource} from '../api/api-v3/hal-resources/query-filter-instance-schema-resource.service';
+import {QueryFilterInstanceResource} from '../api/api-v3/hal-resources/query-filter-instance-resource.service';
 import {WorkPackageCacheService} from '../work-packages/work-package-cache.service';
 import {WorkPackageTableColumnsService} from '../wp-fast-table/state/wp-table-columns.service';
 import {WorkPackageTableSortByService} from '../wp-fast-table/state/wp-table-sort-by.service';
@@ -54,6 +57,9 @@ export class WorkPackagesListService {
               protected $state:any,
               protected QueryDm:QueryDmService,
               protected QueryFormDm:QueryFormDmService,
+              protected QueryResource:QueryResource,
+              protected QueryFilterInstanceResource:QueryFilterInstanceResource,
+              protected WorkPackageCollectionResource:WorkPackageCollectionResource,
               protected states:States,
               protected wpCacheService:WorkPackageCacheService,
               protected wpTableColumns:WorkPackageTableColumnsService,
@@ -78,6 +84,13 @@ export class WorkPackagesListService {
 
     let promise = this.updateStatesFromQueryOnPromise(wpListPromise);
 
+    promise
+      .catch(error => {
+        var queryProps = this.UrlParamsHelper.buildV3GetQueryFromJsonParams(queryParams.query_props);
+
+        return this.handleQueryLoadingError(error, queryProps, queryParams.query_id, projectIdentifier);
+      });
+
     return this.conditionallyLoadForm(promise);
   }
 
@@ -100,6 +113,13 @@ export class WorkPackagesListService {
     let wpListPromise = this.QueryDm.reload(query, pagination);
 
     let promise = this.updateStatesFromQueryOnPromise(wpListPromise);
+
+    promise
+      .catch(error => {
+        let projectIdentifier = query.project && query.project.id
+
+        return this.handleQueryLoadingError(error, {}, query.id, projectIdentifier);
+      });
 
     return this.conditionallyLoadForm(promise);
   }
@@ -257,30 +277,6 @@ export class WorkPackagesListService {
     return promise;
   }
 
-  /**
-   * Resolve the query with experimental API and load work packages through APIv3.
-   */
-  private resolveList(wpListPromise:ng.IPromise<HalResource>):ng.IPromise<HalResource> {
-    //var deferred = this.$q.defer();
-
-    //wpListPromise.then((json:api.ex.WorkPackagesMeta) => {
-    //  this.apiWorkPackages
-    //    .list(json.meta.page, json.meta.per_page, json.meta.query)
-    //    .then((workPackageCollection) => {
-    //      this.mergeApiResponses(json, workPackageCollection);
-
-    //      deferred.resolve(json);
-    //    })
-    //    .catch((error) => {
-    //      this.mergeApiResponses(json, { elements: [], count: 0, total: 0 });
-    //      deferred.reject({ error: error, json: json });
-    //    });
-    //});
-
-    //return deferred.promise;
-    return wpListPromise;
-  }
-
   private updateStatesFromQueryOnPromise(promise:ng.IPromise<QueryResource>):ng.IPromise<QueryResource> {
     promise
       .then(query => {
@@ -375,6 +371,54 @@ export class WorkPackagesListService {
     this
       .queryMenuItemFactory
       .activateMenuItem();
+  }
+
+  private handleQueryLoadingError(error:ErrorResource, queryProps:any, queryId:number, projectIdentifier?:string) {
+    let deferred = this.$q.defer();
+
+    this.NotificationsService.addError(this.I18n.t('js.work_packages.faulty_query.description'), error.message);
+
+    this.QueryFormDm.loadWithParams(queryProps, queryId, projectIdentifier)
+      .then(form => {
+        this.QueryDm.findDefault({ pageSize: 0 }, projectIdentifier)
+          .then((query:QueryResource) => {
+            let payload = new (this.QueryResource as any)(form.payload);
+
+            let filters = _.map((payload.filters as QueryFilterInstanceResource[]), filter => {
+              let schema = _.find(form.schema.filtersSchemas.elements, (schema:QueryFilterInstanceSchemaResource) => {
+                return (schema.filter.allowedValues as QueryFilterResource[])[0].$href === filter.filter.$href;
+              })
+
+              let instance = this.QueryFilterInstanceResource.fromSchema(schema);
+
+              return instance;
+            });
+
+
+            // clear filters while keeping reference
+            query.filters.length = 0;
+            _.each(filters, filter => query.filters.push(filter));
+
+            let sortBys = _.map((payload.sortBy as QuerySortByResource[]), sortBy => {
+              return _.find((form.schema.sortBy.allowedValues as QuerySortByResource[]), candidate => {
+                return candidate.$href === sortBy.$href;
+              })!;
+            });
+
+            query.sortBy.length = 0;
+            _.each(sortBys, sortBy => query.sortBy.push(sortBy));
+
+            query.results.pageSize = queryProps.pageSize;
+            query.results.total = 0;
+
+            this.updateStatesFromQuery(query);
+            this.updateStatesFromForm(query, form);
+
+            deferred.resolve(query);
+          });
+    });
+
+    return deferred.promise;
   }
 }
 

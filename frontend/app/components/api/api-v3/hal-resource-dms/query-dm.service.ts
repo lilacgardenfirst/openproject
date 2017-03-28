@@ -60,6 +60,10 @@ export class QueryDmService {
                                {caching: {enabled: false} });
   }
 
+  public findDefault(queryData:Object, projectIdentifier?:string):ng.IPromise<QueryResource> {
+    return this.find(queryData, undefined, projectIdentifier);
+  }
+
   public reload(query:QueryResource, pagination:PaginationObject):ng.IPromise<QueryResource> {
     let path = this.v3Path.queries({query: query.id});
 

@@ -90,10 +90,11 @@ function SettingsDropdownMenuController($scope:IMyScope,
 
   $scope.saveQuery = function (event:JQueryEventObject) {
     event.stopPropagation();
-    if (!query.id && allowFormAction(event, 'commit')) {
+    if (!query.id && allowQueryAction(event, 'updateImmediately')) {
       closeAnyContextMenu();
       saveModal.activate();
     } else if (query.id && allowQueryAction(event, 'updateImmediately')) {
+      closeAnyContextMenu();
       wpListService.save();
     }
   };

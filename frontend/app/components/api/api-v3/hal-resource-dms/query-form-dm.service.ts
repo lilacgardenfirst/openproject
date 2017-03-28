@@ -26,7 +26,7 @@
 // See doc/COPYRIGHT.rdoc for more details.
 //++
 
-import {FormResource} from '../hal-resources/form-resource.service';
+import {QueryFormResource} from '../hal-resources/query-form-resource.service';
 import {QueryResource} from '../hal-resources/query-resource.service';
 import {opApiModule} from '../../../../angular-modules';
 import {HalRequestService} from '../hal-request/hal-request.service';
@@ -37,7 +37,7 @@ export class QueryFormDmService {
               protected UrlParamsHelper:any) {
   }
 
-  public load(query:QueryResource):ng.IPromise<FormResource> {
+  public load(query:QueryResource):ng.IPromise<QueryFormResource> {
     // We need a valid payload so that we
     // can check whether form saving is possible.
     // The query needs a name to be valid.
@@ -54,6 +54,27 @@ export class QueryFormDmService {
     }
 
     return query.$links.update(payload);
+  }
+
+  public loadWithParams(params:{}, queryId?:number, projectIdentifier?:string):ng.IPromise<QueryFormResource> {
+    // We need a valid payload so that we
+    // can check whether form saving is possible.
+    // The query needs a name to be valid.
+    let payload:any = {
+      'name': '!!!__O__o__O__!!!'
+    };
+
+    let urlParams = this.UrlParamsHelper.buildQueryString(params);
+
+    let href:string;
+
+    if (queryId) {
+      href = this.v3Path.queries.form({ query: queryId });
+    } else {
+      href = this.v3Path.queries.form({ project: projectIdentifier });
+    }
+
+    return this.halRequest.post(href + "?" + urlParams, payload);
   }
 }
 

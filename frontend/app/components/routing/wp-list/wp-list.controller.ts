@@ -102,7 +102,6 @@ function WorkPackagesListController($scope:any,
       }
     });
 
-
     // TODO check if we can instead rely on observe until
     wpTableFilters.observeOnScope($scope).subscribe(filters => {
       updateAndExecuteIfAltered(filters.current, 'filters', true);
@@ -179,7 +178,6 @@ function WorkPackagesListController($scope:any,
       loadingIndicator.table.promise = updateResults();
     }
   }
-
 
   $scope.allowed = function(model:string, permission: string) {
     return AuthorisationService.can(model, permission);

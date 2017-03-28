@@ -46,7 +46,6 @@ interface QueryResourceEmbedded {
 }
 
 export class QueryResource extends HalResource {
-
   public $embedded: QueryResourceEmbedded;
   public id: number;
   public results: WorkPackageCollectionResourceInterface;
