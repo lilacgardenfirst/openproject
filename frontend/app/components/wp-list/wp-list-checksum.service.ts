@@ -96,7 +96,7 @@ export class WorkPackagesListChecksumService {
   }
 
   private isIdDifferent(otherId:number|null) {
-    return (this.id && otherId) && this.id !== otherId;
+    return this.id !== otherId;
   }
 
   private isChecksumDifferent(otherChecksum:string) {

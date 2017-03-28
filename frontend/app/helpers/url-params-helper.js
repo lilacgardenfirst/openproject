@@ -188,13 +188,13 @@ module.exports = function(I18n, PaginationService, PathHelper) {
       }
 
       if (value.id) {
-        return value.id;
+        return value.id.toString();
       } else if (value.$href && value.$href.match(/^\/api\/v3\/string_objects/i)) {
-        return value.$href.match(/value=([^&]+)/)[1];
+        return value.$href.match(/value=([^&]+)/)[1].toString();
       } else if (value.$href) {
-        return value.$href.split('/').pop();
+        return value.$href.split('/').pop().toString();
       } else {
-        return value;
+        return value.toString();
       }
     }
   };
