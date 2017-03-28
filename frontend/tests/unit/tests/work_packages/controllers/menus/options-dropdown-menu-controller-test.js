@@ -41,7 +41,10 @@ describe('optionsDropdown Directive', function() {
       sortByModal,
       groupByModal,
       exportModal,
-      wpTableHierarchy;
+      wpTableHierarchy,
+      states,
+      query,
+      form;
 
   beforeEach(angular.mock.module('openproject.models',
                     'openproject.workPackages',
@@ -67,6 +70,27 @@ describe('optionsDropdown Directive', function() {
     groupByModal = {};
     exportModal = {};
 
+    query = {
+      id: 5
+    }
+
+    form = {}
+
+    states = {
+      table: {
+        query: {
+          getCurrentValue: function() {
+            return query;
+          }
+        },
+        form: {
+          getCurrentValue: function() {
+            return form;
+          }
+        }
+      }
+    };
+
     $provide.constant('wpTableSum', wpTableSum);
     $provide.constant('wpTableHierarchy', wpTableHierarchy);
     $provide.constant('wpTableGroupBy', wpTableGroupBy);
@@ -74,6 +98,7 @@ describe('optionsDropdown Directive', function() {
     $provide.constant('sortingModal', sortByModal);
     $provide.constant('groupingModal', groupByModal);
     $provide.constant('exportModal', exportModal);
+    $provide.constant('states', states);
   }));
 
   beforeEach(inject(function($rootScope, $compile) {

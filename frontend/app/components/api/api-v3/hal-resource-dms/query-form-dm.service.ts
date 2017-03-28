@@ -33,7 +33,8 @@ import {HalRequestService} from '../hal-request/hal-request.service';
 
 export class QueryFormDmService {
   constructor(protected halRequest:HalRequestService,
-              protected v3Path:any) {
+              protected v3Path:any,
+              protected UrlParamsHelper:any) {
   }
 
   public load(query:QueryResource):ng.IPromise<FormResource> {
@@ -41,7 +42,7 @@ export class QueryFormDmService {
     // can check whether form saving is possible.
     // The query needs a name to be valid.
     let payload:any = {
-      'name': '!!!__O__o__O__!!!'
+      'name': query.name || '!!!__O__o__O__!!!'
     };
 
     if (query.project) {

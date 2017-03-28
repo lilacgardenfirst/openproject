@@ -93,10 +93,8 @@ function SettingsDropdownMenuController($scope:IMyScope,
     if (!query.id && allowFormAction(event, 'commit')) {
       closeAnyContextMenu();
       saveModal.activate();
-    } else {
-      if (query.id && allowQueryAction(event, 'updateImmediately')) {
-        wpListService.save();
-      }
+    } else if (query.id && allowQueryAction(event, 'updateImmediately')) {
+      wpListService.save();
     }
   };
 
@@ -198,17 +196,11 @@ function SettingsDropdownMenuController($scope:IMyScope,
   };
 
   $scope.showSaveModalInvalid = function () {
-    return false; //$scope.query.isNew() || AuthorisationService.cannot('query', 'create');
+    return AuthorisationService.cannot('query', 'updateImmediately');
   };
 
   $scope.saveQueryInvalid = function () {
-    return false;
-    //return (!$scope.query.isDirty()) ||
-    //  (
-    //    $scope.query.isDirty() && !$scope.query.isNew() &&
-    //    AuthorisationService.cannot('query', 'update')
-    //  ) ||
-    //  ($scope.query.isNew() && AuthorisationService.cannot('query', 'create'));
+    return AuthorisationService.cannot('query', 'updateImmediately');
   };
 
   function showModal(this:any) {
