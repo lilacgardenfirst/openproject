@@ -33,14 +33,14 @@ module API
       class CreateFormRepresenter < FormRepresenter
         link :self do
           {
-            href: api_v3_paths.query_form,
+            href: api_v3_paths.create_query_form,
             method: :post
           }
         end
 
         link :validate do
           {
-            href: api_v3_paths.query_form,
+            href: api_v3_paths.create_query_form,
             method: :post
           }
         end
@@ -58,8 +58,8 @@ module API
 
         def allow_commit?
           represented.name.present? && (
-              (!represented.is_public && current_user.allowed_to?(:save_queries, represented.project)) ||
-              (represented.is_public && current_user.allowed_to?(:manage_public_queries, represented.project))
+              (!represented.is_public && current_user.allowed_to?(:save_queries, represented.project, global: represented.project.nil?)) ||
+              (represented.is_public && current_user.allowed_to?(:manage_public_queries, represented.project, global: represented.project.nil?))
             ) && @errors.empty?
         end
       end
