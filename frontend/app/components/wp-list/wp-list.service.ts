@@ -384,20 +384,7 @@ export class WorkPackagesListService {
           .then((query:QueryResource) => {
             let payload = new (this.QueryResource as any)(form.payload);
 
-            let filters = _.map((payload.filters as QueryFilterInstanceResource[]), filter => {
-              let schema = _.find(form.schema.filtersSchemas.elements, (schema:QueryFilterInstanceSchemaResource) => {
-                return (schema.filter.allowedValues as QueryFilterResource[])[0].$href === filter.filter.$href;
-              })
-
-              let instance = this.QueryFilterInstanceResource.fromSchema(schema);
-
-              return instance;
-            });
-
-
-            // clear filters while keeping reference
-            query.filters.length = 0;
-            _.each(filters, filter => query.filters.push(filter));
+            this.restoreFilters(query, payload, form.schema);
 
             let sortBys = _.map((payload.sortBy as QuerySortByResource[]), sortBy => {
               return _.find((form.schema.sortBy.allowedValues as QuerySortByResource[]), candidate => {
@@ -419,6 +406,39 @@ export class WorkPackagesListService {
     });
 
     return deferred.promise;
+  }
+
+  private restoreFilters(query:QueryResource, payload:QueryResource, querySchema:SchemaResource) {
+    let filters = _.map((payload.filters as QueryFilterInstanceResource[]), filter => {
+      let filterInstanceSchema = _.find(querySchema.filtersSchemas.elements, (schema:QueryFilterInstanceSchemaResource) => {
+        return (schema.filter.allowedValues as QueryFilterResource[])[0].$href === filter.filter.$href;
+      })
+
+      if (!filterInstanceSchema) {
+        return null;
+      }
+
+      let recreatedFilter = this.QueryFilterInstanceResource.fromSchema(filterInstanceSchema);
+
+      let operator = _.find(filterInstanceSchema.operator.allowedValues, operator => {
+        return operator.$href === filter.operator.$href;
+      });
+
+      if (operator) {
+        recreatedFilter.operator = operator;
+      }
+
+      recreatedFilter.values.length = 0
+      _.each(filter.values, value => recreatedFilter.values.push(value));
+
+      return recreatedFilter;
+    });
+
+    filters = _.compact(filters);
+
+    // clear filters while keeping reference
+    query.filters.length = 0;
+    _.each(filters, filter => query.filters.push(filter));
   }
 }
 

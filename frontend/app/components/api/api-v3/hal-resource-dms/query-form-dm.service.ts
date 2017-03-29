@@ -61,8 +61,16 @@ export class QueryFormDmService {
     // can check whether form saving is possible.
     // The query needs a name to be valid.
     let payload:any = {
-      'name': '!!!__O__o__O__!!!'
+      'name': '!!!__O__o__O__!!!',
     };
+
+    if (projectIdentifier) {
+      payload['_links'] = {
+        'project': {
+          'href': this.v3Path.project({project: projectIdentifier})
+        }
+      }
+    }
 
     let urlParams = this.UrlParamsHelper.buildQueryString(params);
 
@@ -71,7 +79,7 @@ export class QueryFormDmService {
     if (queryId) {
       href = this.v3Path.queries.form({ query: queryId });
     } else {
-      href = this.v3Path.queries.form({ project: projectIdentifier });
+      href = this.v3Path.queries.form();
     }
 
     return this.halRequest.post(href + "?" + urlParams, payload);
