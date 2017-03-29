@@ -47,19 +47,16 @@ import {WorkPackageTableGroupByService} from '../wp-fast-table/state/wp-table-gr
 import {WorkPackageTableFiltersService} from '../wp-fast-table/state/wp-table-filters.service';
 import {WorkPackageTableSumService} from '../wp-fast-table/state/wp-table-sum.service';
 import {WorkPackageTablePaginationService} from '../wp-fast-table/state/wp-table-pagination.service';
+import {WorkPackagesListInvalidQueryService} from './wp-list-invalid-query.service.ts';
 
 export class WorkPackagesListService {
-  constructor(protected apiWorkPackages:any,
-              protected NotificationsService:any,
+  constructor(protected NotificationsService:any,
               protected UrlParamsHelper:any,
               protected AuthorisationService:any,
               protected $q:ng.IQService,
               protected $state:any,
               protected QueryDm:QueryDmService,
               protected QueryFormDm:QueryFormDmService,
-              protected QueryResource:QueryResource,
-              protected QueryFilterInstanceResource:QueryFilterInstanceResource,
-              protected WorkPackageCollectionResource:WorkPackageCollectionResource,
               protected states:States,
               protected wpCacheService:WorkPackageCacheService,
               protected wpTableColumns:WorkPackageTableColumnsService,
@@ -68,6 +65,7 @@ export class WorkPackagesListService {
               protected wpTableFilters:WorkPackageTableFiltersService,
               protected wpTableSum:WorkPackageTableSumService,
               protected wpTablePagination:WorkPackageTablePaginationService,
+              protected wpListInvalidQueryService:WorkPackagesListInvalidQueryService,
               protected I18n:op.I18n,
               protected queryMenuItemFactory:any) {}
 
@@ -382,21 +380,14 @@ export class WorkPackagesListService {
       .then(form => {
         this.QueryDm.findDefault({ pageSize: 0 }, projectIdentifier)
           .then((query:QueryResource) => {
-            let payload = new (this.QueryResource as any)(form.payload);
-
-            this.restoreFilters(query, payload, form.schema);
-
-            let sortBys = _.map((payload.sortBy as QuerySortByResource[]), sortBy => {
-              return _.find((form.schema.sortBy.allowedValues as QuerySortByResource[]), candidate => {
-                return candidate.$href === sortBy.$href;
-              })!;
-            });
-
-            query.sortBy.length = 0;
-            _.each(sortBys, sortBy => query.sortBy.push(sortBy));
+            this.wpListInvalidQueryService.restoreQuery(query, form);
 
             query.results.pageSize = queryProps.pageSize;
             query.results.total = 0;
+
+            if (queryId) {
+              query.id = queryId;
+            }
 
             this.updateStatesFromQuery(query);
             this.updateStatesFromForm(query, form);
@@ -406,39 +397,6 @@ export class WorkPackagesListService {
     });
 
     return deferred.promise;
-  }
-
-  private restoreFilters(query:QueryResource, payload:QueryResource, querySchema:SchemaResource) {
-    let filters = _.map((payload.filters as QueryFilterInstanceResource[]), filter => {
-      let filterInstanceSchema = _.find(querySchema.filtersSchemas.elements, (schema:QueryFilterInstanceSchemaResource) => {
-        return (schema.filter.allowedValues as QueryFilterResource[])[0].$href === filter.filter.$href;
-      })
-
-      if (!filterInstanceSchema) {
-        return null;
-      }
-
-      let recreatedFilter = this.QueryFilterInstanceResource.fromSchema(filterInstanceSchema);
-
-      let operator = _.find(filterInstanceSchema.operator.allowedValues, operator => {
-        return operator.$href === filter.operator.$href;
-      });
-
-      if (operator) {
-        recreatedFilter.operator = operator;
-      }
-
-      recreatedFilter.values.length = 0
-      _.each(filter.values, value => recreatedFilter.values.push(value));
-
-      return recreatedFilter;
-    });
-
-    filters = _.compact(filters);
-
-    // clear filters while keeping reference
-    query.filters.length = 0;
-    _.each(filters, filter => query.filters.push(filter));
   }
 }
 

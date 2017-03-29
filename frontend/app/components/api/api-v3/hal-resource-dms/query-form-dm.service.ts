@@ -60,9 +60,11 @@ export class QueryFormDmService {
     // We need a valid payload so that we
     // can check whether form saving is possible.
     // The query needs a name to be valid.
-    let payload:any = {
-      'name': '!!!__O__o__O__!!!',
-    };
+    let payload:any = {};
+
+    if (!queryId) {
+      payload['name'] = '!!!__O__o__O__!!!'
+    }
 
     if (projectIdentifier) {
       payload['_links'] = {
